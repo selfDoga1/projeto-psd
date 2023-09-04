@@ -6,6 +6,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 
+# noinspection DuplicatedCode
 class MethodOne:
     def __init__(self):
         self.matrix_1 = Matrix(f'{parent_dir}/src/10_int.txt')
@@ -44,7 +45,7 @@ class MethodOne:
         return result
 
     def make_output_file(self):
-        file_name = f'output/matriz {self.matrix_1.col_size} x {self.matrix_2.row_size} - [{self.elapsed_time}] metodo P1 .txt'
+        file_name = f'output/matriz {self.matrix_1.col_size} x {self.matrix_2.row_size} - [{self.elapsed_time}].txt'
 
         with open(file_name, 'w') as file:
             file.write(f'{self.matrix_1.col_size} {self.matrix_2.row_size}\n')
