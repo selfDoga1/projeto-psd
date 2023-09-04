@@ -15,10 +15,13 @@ class MethodOne:
         self.result = self.get_multi_matrix()
         end_time = time.time()
 
-        elapsed_time = end_time - start_time
+        self.elapsed_time = end_time - start_time
+        self.elapsed_time = '{:.5f}'.format(self.elapsed_time)
 
         print('result: ', self.result)
-        print('elapsed time: ', '{:.5f}'.format(elapsed_time))
+        print('elapsed time: ', self.elapsed_time)
+
+        self.make_output_file()
 
     def get_multi_matrix(self):
         if self.matrix_1.col_size != self.matrix_2.row_size:
@@ -39,6 +42,15 @@ class MethodOne:
             result.append(row)
 
         return result
+
+    def make_output_file(self):
+        file_name = f'output/matriz {self.matrix_1.col_size} x {self.matrix_2.row_size} - [{self.elapsed_time}] metodo P1 .txt'
+
+        with open(file_name, 'w') as file:
+            file.write(f'{self.matrix_1.col_size} {self.matrix_2.row_size}\n')
+            for row in self.result:
+                line = ' '.join(map(str, row))
+                file.write(line + '\n')
 
 
 if __name__ == '__main__':
