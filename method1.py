@@ -3,14 +3,12 @@ import os
 import time
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
 
 # noinspection DuplicatedCode
 class MethodOne:
     def __init__(self):
-        self.matrix_1 = Matrix(f'{parent_dir}/src/10_int.txt')
-        self.matrix_2 = Matrix(f'{parent_dir}/src/10_int.txt')
+        self.matrix_1 = Matrix(f'{current_dir}/src/10_int.txt')
+        self.matrix_2 = Matrix(f'{current_dir}/src/10_int.txt')
 
         start_time = time.time()
         self.result = self.get_multi_matrix()

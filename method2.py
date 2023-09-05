@@ -5,9 +5,9 @@ import time
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
 
-THREADS_AMOUNT = 4
+THREADS_AMOUNT = 5
+
 
 # noinspection PyUnresolvedReferences
 class CustomThread(Thread):
@@ -27,8 +27,8 @@ class CustomThread(Thread):
 # noinspection DuplicatedCode,PyShadowingNames
 class MethodTwo:
     def __init__(self) -> None:
-        self.matrix_1 = Matrix(f'{parent_dir}/src/10_int.txt')
-        self.matrix_2 = Matrix(f'{parent_dir}/src/10_int.txt')
+        self.matrix_1 = Matrix(f'{current_dir}/src/128.txt')
+        self.matrix_2 = Matrix(f'{current_dir}/src/128.txt')
         self.result, self.start_time, self.end_time = self.get_multi_matrix()
 
         self.elapsed_time = self.end_time - self.start_time
@@ -62,14 +62,12 @@ class MethodTwo:
                 product = sum(
                     [
                         self.matrix_1.rows[row_index_m1][col_index_m1] *
-                        self.matrix_2.get_col(col_index_m2)[col_index_m1]
+                        self.matrix_2.get_col(col_index_m2)[row_index_m1]
                         for col_index_m1 in range(self.matrix_1.col_size)
                     ]
                 )
                 row.append(product)
             thread_result.append(row)
-
-        print('thread_result: ', thread_result)
 
         return thread_result
 
@@ -94,8 +92,6 @@ class MethodTwo:
             global_result.extend(thread.join())
 
         end_time = time.time()
-
-        print('global: ', global_result)
 
         return global_result, start_time, end_time
 

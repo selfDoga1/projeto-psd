@@ -2,8 +2,6 @@
 class Matrix:
     def __init__(self, matrix_path):
         self.row_size, self.col_size, self.rows = self.__load_matrix(matrix_path)
-        # print('matrix:', self.rows)
-        print(self.row_size, self.col_size)
 
     def __load_matrix(self, matrix_path) -> object:
         with open(matrix_path, 'r') as file:
