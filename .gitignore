@@ -2,6 +2,7 @@
 projeto.pdf
 /src
 /output
+/venv
 
 # python
 # Byte-compiled / optimized / DLL files
