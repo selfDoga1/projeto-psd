@@ -1,7 +1,10 @@
+from dotenv import load_dotenv
 from matrix import Matrix
 import Pyro4
 import uuid
 import os
+
+load_dotenv()
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -14,25 +17,27 @@ def load_matrix(matrix_file_name) -> Matrix:
 
 if __name__ == "__main__":
 
-    print(parent_dir)
+    Pyro4.config.HOST = os.getenv('HOST')
 
     matrix_1 = load_matrix('4_int.txt')
     matrix_2 = load_matrix('4_int.txt')
 
     ns = Pyro4.locateNS()
 
-    central_server_uri = ns.lookup('central_server')
-    central_server = Pyro4.Proxy(central_server_uri)
+    server_uri = ns.lookup('server')
+    server = Pyro4.Proxy(server_uri)
+
+    print('server:', server)
 
     worker_uri = ns.lookup('worker')
-    central_server.register_worker(worker_uri, uuid.uuid4())
-    central_server.register_worker(worker_uri, uuid.uuid4())
+    server.register_worker(worker_uri, uuid.uuid4())
+    server.register_worker(worker_uri, uuid.uuid4())
 
-    central_server.register_matrices(matrix_1.get_serialized(), matrix_2.get_serialized())
-    central_server.prepare()
-    central_server.start()
+    server.register_matrices(matrix_1.get_serialized(), matrix_2.get_serialized())
+    server.prepare()
+    server.start()
 
-    # result = central_server.divide_and_multiply(matrix_a, matrix_b)
+    # result = server.divide_and_multiply(matrix_a, matrix_b)
 
     # for row in result:
     #     print(row)

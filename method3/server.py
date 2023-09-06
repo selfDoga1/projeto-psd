@@ -1,6 +1,9 @@
+from dotenv import load_dotenv
 import Pyro4
+import os
 
 DEBUG = True
+load_dotenv()
 
 
 # noinspection PyMethodMayBeStatic,DuplicatedCode
@@ -20,14 +23,16 @@ class CentralServer:
             'object': worker,
             'result': None
         }
+        print('-- register_worker --')
+        print(f'worker registered with id {worker_id}!')
 
     @Pyro4.expose
     def register_matrices(self, matrix_1, matrix_2):
         self.matrix_1 = matrix_1
         self.matrix_2 = matrix_2
 
-        # print('-- register_matrices --')
-        # print(self.matrix_1, ' - ', self.matrix_2)
+        print('-- register_matrices --')
+        print(self.matrix_1, ' - ', self.matrix_2)
 
     @Pyro4.expose
     def prepare(self):
@@ -59,12 +64,12 @@ class CentralServer:
 
 
 if __name__ == '__main__':
-    Pyro4.config.HOST = "localhost"
-    Pyro4.config.SERIALIZER = "json"
+    Pyro4.config.HOST = os.getenv('HOST')
+    Pyro4.config.SERIALIZER = os.getenv('SERIALIZER')
     daemon = Pyro4.Daemon()
     uri = daemon.register(CentralServer)
     ns = Pyro4.locateNS()
-    ns.register("central_server", uri)
+    ns.register('server', uri)
 
-    print("Central Server ready. uri:", uri)
+    print('Central Server ready. uri:', uri)
     daemon.requestLoop()

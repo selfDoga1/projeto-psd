@@ -1,13 +1,15 @@
 from matrix import MatrixSerializer
+from dotenv import load_dotenv
 import Pyro4
-import uuid
+import os
 
 
 DEBUG = True
+load_dotenv()
 
 ns = Pyro4.locateNS()
-central_server_uri = ns.lookup('central_server')
-central_server = Pyro4.Proxy(central_server_uri)
+server_uri = ns.lookup('server')
+server = Pyro4.Proxy(server_uri)
 
 
 def print_debug(*args):
@@ -42,13 +44,13 @@ class Worker:
 
 
 if __name__ == "__main__":
-    Pyro4.config.HOST = "localhost"
-    Pyro4.config.SERIALIZER = "json"
+    Pyro4.config.HOST = os.getenv('HOST')
+    Pyro4.config.SERIALIZER = os.getenv('SERIALIZER')
     daemon = Pyro4.Daemon()
     ns = Pyro4.locateNS()
 
     uri = daemon.register(Worker)
-    ns.register("worker", uri)
+    ns.register('worker', uri)
 
-    print("Worker ready. uri", uri)
+    print('Worker ready. uri', uri)
     daemon.requestLoop()
