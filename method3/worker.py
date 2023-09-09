@@ -53,7 +53,7 @@ class Worker:
 
     @classmethod
     @Pyro4.expose
-    def work(cls, matrix_1, matrix_2, worker_chunk):
+    def work(cls, matrix_1, matrix_2, worker_chunk, worker_id):
         cls.matrix_1 = MatrixSerializer().deserialize(matrix_1)
         cls.matrix_2 = MatrixSerializer().deserialize(matrix_2)
 
@@ -77,7 +77,12 @@ class Worker:
         end_time = time.time()
         elapsed_time = end_time - start_time
 
-        return worker_result, elapsed_time
+        return (
+            worker_result,
+            elapsed_time,
+            THREADS_AMOUNT,
+            worker_id
+        )
 
     @classmethod
     def __get_chunk_per_thread(cls, worker_chunk_start, worker_chunk_end):

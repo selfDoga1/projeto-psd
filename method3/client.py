@@ -23,10 +23,10 @@ if __name__ == "__main__":
 
     print(server.register_matrices(matrix_1.get_serialized(), matrix_2.get_serialized()))
     print(server.prepare())
-    result, workers_amount, elapsed_time = server.start()
+    result, workers_amount, elapsed_time, current_time = server.start()
 
     file_name = (
-        f'output/matriz '
+        f'output/ [{current_time}] matriz '
         f'{matrix_1.col_size} x {matrix_2.row_size} - '
         f'[{workers_amount} WORKERS] [{elapsed_time}].txt'
     )

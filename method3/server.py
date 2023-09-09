@@ -3,6 +3,7 @@ from threading import Thread
 import Pyro4
 import os
 import time
+from datetime import datetime
 
 DEBUG = True
 load_dotenv()
@@ -73,11 +74,11 @@ class Server:
     @classmethod
     @Pyro4.expose
     def start(cls):
+        current_time = datetime.now().strftime("%H:%M:%S")
         matrix_1_col_size = cls.matrix_1[0]
         matrix_2_row_size = cls.matrix_1[1]
-        print('matrix_1_col_size:', matrix_1_col_size)
-        print('matrix_2_row_size:', matrix_2_row_size)
         global_result = []
+        global_log = {}
 
         if matrix_1_col_size != matrix_2_row_size:
             raise ValueError("O número de colunas da matriz 1 deve ser igual ao número de linhas da matriz 2!")
@@ -85,7 +86,7 @@ class Server:
         index = 0
         for worker_id in cls.remote_workers:
             worker = cls.remote_workers[worker_id]['object']
-            thread = CustomThread(target=worker.work, args=[cls.matrix_1, cls.matrix_2, cls.chunks[index]])
+            thread = CustomThread(target=worker.work, args=[cls.matrix_1, cls.matrix_2, cls.chunks[index], worker_id])
             cls.thread_per_worker.append(thread)
             index += 1
 
@@ -95,17 +96,22 @@ class Server:
             thread.start()
 
         for thread in cls.thread_per_worker:
-            worker_result, worker_elapsed_time = thread.join()
+            worker_result, worker_elapsed_time, worker_threads_amount, worker_id = thread.join()
             global_result.extend(worker_result)
+            global_log[f'{worker_id}'] = {
+                'threads_amount': worker_threads_amount,
+                'elapsed_time': worker_elapsed_time
+            }
 
         end_time = time.time()
         elapsed_time = end_time - start_time
 
-        return global_result, len(cls.remote_workers), elapsed_time
+        cls.make_log_file(global_log, elapsed_time, current_time)
+        return global_result, len(cls.remote_workers), elapsed_time, current_time
 
     @staticmethod
     def divide_chunks_per_worker(rows, workers_amount):
-        _result = []
+        result = []
         chunk_per_worker = rows // workers_amount
         rest_division = rows % workers_amount
         start = 0
@@ -114,12 +120,24 @@ class Server:
             end = start + chunk_per_worker
             if i < rest_division:
                 end += 1
-            _result.append([start, end])
+            result.append([start, end])
             start = end
 
-        return _result
+        return result
 
+    @classmethod
+    def make_log_file(cls, global_log, elapsed_time, current_time):
+        file_name = (
+            f'output/log [{current_time}] '
+            f'{cls.matrix_1[0]} x {cls.matrix_2[1]} - '
+            f'[{len(cls.remote_workers)} WORKERS] [{elapsed_time}].txt'
+        )
 
+        with open(file_name, 'w') as file:
+            for worker_uri in global_log:
+                worker = global_log[worker_uri]
+                line = f'{worker_uri}: {worker["threads_amount"]} threads - elapsed time: {worker["elapsed_time"]}'
+                file.write(line + '\n')
 
 
 if __name__ == '__main__':
