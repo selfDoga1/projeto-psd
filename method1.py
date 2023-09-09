@@ -7,8 +7,8 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 # noinspection DuplicatedCode
 class MethodOne:
     def __init__(self):
-        self.matrix_1 = Matrix(f'{current_dir}/src/10_int.txt')
-        self.matrix_2 = Matrix(f'{current_dir}/src/10_int.txt')
+        self.matrix_1 = Matrix(f'{current_dir}/src/3_alt.txt')
+        self.matrix_2 = Matrix(f'{current_dir}/src/3_alt.txt')
 
         start_time = time.time()
         self.result = self.get_multi_matrix()

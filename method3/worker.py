@@ -1,12 +1,29 @@
 from matrix import MatrixSerializer
 from dotenv import load_dotenv
 from Pyro4.core import Daemon
+from threading import Thread
 import Pyro4
 import os
-
+import time
 
 DEBUG = True
 load_dotenv()
+THREADS_AMOUNT = 2
+
+
+# noinspection PyUnresolvedReferences
+class CustomThread(Thread):
+    def __init__(self, target, args=()):
+        super().__init__(target=target, args=args)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args)
+
+    def join(self, timeout=None):
+        super().join(timeout)
+        return self._return
 
 
 # noinspection DuplicatedCode
@@ -28,29 +45,72 @@ class CustomDaemon(Daemon):
             daemon.requestLoop()
 
 
+# noinspection DuplicatedCode
 class Worker:
-    @staticmethod
+    thread_per_chunk = []
+    matrix_1 = None
+    matrix_2 = None
+
+    @classmethod
     @Pyro4.expose
-    def work(matrix_1, matrix_2, chunk):
-        matrix_1 = MatrixSerializer().deserialize(matrix_1)
-        matrix_2 = MatrixSerializer().deserialize(matrix_2)
-        start, end = chunk[0], chunk[1]
+    def work(cls, matrix_1, matrix_2, worker_chunk):
+        cls.matrix_1 = MatrixSerializer().deserialize(matrix_1)
+        cls.matrix_2 = MatrixSerializer().deserialize(matrix_2)
+
+        worker_chunk_start, worker_chunk_end = worker_chunk[0], worker_chunk[1]
+        chunk_per_thread = cls.__get_chunk_per_thread(worker_chunk_start, worker_chunk_end)
+
         worker_result = []
 
+        for chunk in chunk_per_thread:
+            thread = CustomThread(target=cls.__process, args=[chunk[0], chunk[1]])
+            cls.thread_per_chunk.append(thread)
+
+        start_time = time.time()
+
+        for thread in cls.thread_per_chunk:
+            thread.start()
+
+        for thread in cls.thread_per_chunk:
+            worker_result.extend(thread.join())
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+
+        return worker_result, elapsed_time
+
+    @classmethod
+    def __get_chunk_per_thread(cls, worker_chunk_start, worker_chunk_end):
+        interval_size = (worker_chunk_end - worker_chunk_start) // THREADS_AMOUNT
+        interval_per_thread = []
+
+        if interval_size == 0:
+            interval_per_thread.append([worker_chunk_start, worker_chunk_end])
+        else:
+            for i in range(THREADS_AMOUNT):
+                start = i * interval_size
+                end = (i + 1) * interval_size if i < THREADS_AMOUNT - 1 else worker_chunk_end
+                interval_per_thread.append([start, end])
+
+        return interval_per_thread
+
+    @classmethod
+    def __process(cls, start, end):
+        result = []
         for row_index_m1 in range(start, end):
             row = []
-            for col_index_m2 in range(matrix_2.col_size):
+            for col_index_m2 in range(cls.matrix_2.col_size):
                 product = sum(
                     [
-                        matrix_1.rows[row_index_m1][col_index_m1] *
-                        matrix_2.get_col(col_index_m2)[row_index_m1]
-                        for col_index_m1 in range(matrix_1.col_size)
+                        cls.matrix_1.rows[row_index_m1][col_index_m1] *
+                        cls.matrix_2.get_col(col_index_m2)[col_index_m1]
+                        for col_index_m1 in range(cls.matrix_1.col_size)
                     ]
                 )
                 row.append(product)
-            worker_result.append(row)
+            result.append(row)
 
-        return worker_result
+        return result
 
 
 if __name__ == "__main__":
