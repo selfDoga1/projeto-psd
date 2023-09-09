@@ -17,27 +17,13 @@ def load_matrix(matrix_file_name) -> Matrix:
 
 if __name__ == "__main__":
 
-    Pyro4.config.HOST = os.getenv('HOST')
+    matrix_1 = load_matrix('128.txt')
+    matrix_2 = load_matrix('128.txt')
 
-    matrix_1 = load_matrix('4_int.txt')
-    matrix_2 = load_matrix('4_int.txt')
+    server_uri = f'PYRO:{os.getenv("SERVER_NAME")}@{os.getenv("SERVER_HOST")}:{os.getenv("SERVER_PORT")}'
+    server = Pyro4.core.Proxy(server_uri)
 
-    ns = Pyro4.locateNS()
-
-    server_uri = ns.lookup('server')
-    server = Pyro4.Proxy(server_uri)
-
-    print('server:', server)
-
-    worker_uri = ns.lookup('worker')
-    server.register_worker(worker_uri, uuid.uuid4())
-    server.register_worker(worker_uri, uuid.uuid4())
-
-    server.register_matrices(matrix_1.get_serialized(), matrix_2.get_serialized())
-    server.prepare()
+    print(server.register_matrices(matrix_1.get_serialized(), matrix_2.get_serialized()))
+    print(server.prepare())
     server.start()
 
-    # result = server.divide_and_multiply(matrix_a, matrix_b)
-
-    # for row in result:
-    #     print(row)

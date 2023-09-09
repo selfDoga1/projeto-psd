@@ -1,5 +1,6 @@
 from matrix import MatrixSerializer
 from dotenv import load_dotenv
+from Pyro4.core import Daemon
 import Pyro4
 import os
 
@@ -7,21 +8,30 @@ import os
 DEBUG = True
 load_dotenv()
 
-ns = Pyro4.locateNS()
-server_uri = ns.lookup('server')
-server = Pyro4.Proxy(server_uri)
 
+# noinspection DuplicatedCode
+class CustomDaemon(Daemon):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-def print_debug(*args):
-    if DEBUG:
-        print(*args)
+    @staticmethod
+    def serveSimple(objects, host=None, port=0, daemon=None, ns=True, verbose=True, server_uri=None):
+        if daemon is None:
+            daemon = Daemon(host, port)
+        with daemon:
+            for obj, name in objects.items():
+                localname = name
+                uri = daemon.register(obj, localname)
+                server = Pyro4.core.Proxy(server_uri)
+                print(f'{server.register_remote_worker(uri, server_uri)}')
+                print("Worker is running.")
+            daemon.requestLoop()
 
 
 class Worker:
-
+    @staticmethod
     @Pyro4.expose
-    def work(self, matrix_1, matrix_2, chunk, worker_id):
-
+    def work(matrix_1, matrix_2, chunk):
         matrix_1 = MatrixSerializer().deserialize(matrix_1)
         matrix_2 = MatrixSerializer().deserialize(matrix_2)
         start, end = chunk[0], chunk[1]
@@ -44,13 +54,12 @@ class Worker:
 
 
 if __name__ == "__main__":
-    Pyro4.config.HOST = os.getenv('HOST')
     Pyro4.config.SERIALIZER = os.getenv('SERIALIZER')
-    daemon = Pyro4.Daemon()
-    ns = Pyro4.locateNS()
+    server_uri = f'PYRO:{os.getenv("SERVER_NAME")}@{os.getenv("SERVER_HOST")}:{os.getenv("SERVER_PORT")}'
 
-    uri = daemon.register(Worker)
-    ns.register('worker', uri)
-
-    print('Worker ready. uri', uri)
-    daemon.requestLoop()
+    CustomDaemon().serveSimple(
+        {Worker: f'{os.getenv("WORKER_NAME")}'},
+        host=os.getenv('WORKER_HOST'),
+        port=0,
+        server_uri=server_uri
+    )
