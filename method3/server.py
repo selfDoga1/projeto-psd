@@ -128,7 +128,7 @@ class Server:
     @classmethod
     def make_log_file(cls, global_log, elapsed_time, current_time):
         file_name = (
-            f'output/log [{current_time}] '
+            f'output/[{current_time}] log '
             f'{cls.matrix_1[0]} x {cls.matrix_2[1]} - '
             f'[{len(cls.remote_workers)} WORKERS] [{elapsed_time}].txt'
         )
