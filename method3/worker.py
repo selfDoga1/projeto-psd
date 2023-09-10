@@ -5,6 +5,7 @@ from threading import Thread
 import Pyro4
 import os
 import time
+import numpy as np
 
 DEBUG = True
 load_dotenv()
@@ -101,21 +102,32 @@ class Worker:
 
     @classmethod
     def __process(cls, start, end):
-        result = []
-        for row_index_m1 in range(start, end):
-            row = []
-            for col_index_m2 in range(cls.matrix_2.col_size):
-                product = sum(
-                    [
-                        cls.matrix_1.rows[row_index_m1][col_index_m1] *
-                        cls.matrix_2.get_col(col_index_m2)[col_index_m1]
-                        for col_index_m1 in range(cls.matrix_1.col_size)
-                    ]
-                )
-                row.append(product)
-            result.append(row)
+        worker_result = []
+        # for row_index_m1 in range(start, end):
+        #     row = []
+        #     for col_index_m2 in range(cls.matrix_2.col_size):
+        #         product = sum(
+        #             [
+        #                 cls.matrix_1.rows[row_index_m1][col_index_m1] *
+        #                 cls.matrix_2.get_col(col_index_m2)[col_index_m1]
+        #                 for col_index_m1 in range(cls.matrix_1.col_size)
+        #             ]
+        #         )
+        #         row.append(product)
+        #     worker_result.append(row)
 
-        return result
+        array_matrix_1 = np.array(cls.matrix_1.rows)
+        array_matrix_2 = np.array(cls.matrix_2.rows)
+
+        sub_matrix_1 = array_matrix_1[start:end]
+        sub_matrix_2 = array_matrix_2
+
+        sub_result = np.dot(sub_matrix_1, sub_matrix_2.T)
+
+        for row in sub_result:
+            worker_result.append(row.tolist())
+
+        return worker_result
 
 
 if __name__ == "__main__":

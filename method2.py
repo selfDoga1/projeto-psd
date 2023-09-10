@@ -2,11 +2,10 @@ from matrix import Matrix
 from threading import Thread
 import os
 import time
-
+import numpy as np
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-THREADS_AMOUNT = 5
-
+THREADS_AMOUNT = 2
 
 # noinspection PyUnresolvedReferences
 class CustomThread(Thread):
@@ -17,13 +16,12 @@ class CustomThread(Thread):
     def run(self):
         if self._target is not None:
             self._return = self._target(*self._args)
-
     def join(self, timeout=None):
         super().join(timeout)
         return self._return
 
 
-# noinspection DuplicatedCode,PyShadowingNames
+# no/nspection DuplicatedCode,PyShadowingNames
 class MethodTwo:
     def __init__(self) -> None:
         self.matrix_1 = Matrix(f'{current_dir}/src/128.txt')
@@ -31,7 +29,7 @@ class MethodTwo:
         self.result, self.start_time, self.end_time = self.get_multi_matrix()
 
         self.elapsed_time = self.end_time - self.start_time
-        self.elapsed_time = '{:.10f}'.format(self.elapsed_time)
+        # self.elapsed_time = '{:.10f}'.format(self.elapsed_time)
 
         print('elapsed time: ', self.elapsed_time)
 
@@ -55,18 +53,29 @@ class MethodTwo:
     def _process(self, start, end) -> list:
         thread_result = []
 
-        for row_index_m1 in range(start, end):
-            row = []
-            for col_index_m2 in range(self.matrix_2.col_size):
-                product = sum(
-                    [
-                        self.matrix_1.rows[row_index_m1][col_index_m1] *
-                        self.matrix_2.get_col(col_index_m2)[row_index_m1]
-                        for col_index_m1 in range(self.matrix_1.col_size)
-                    ]
-                )
-                row.append(product)
-            thread_result.append(row)
+        # for row_index_m1 in range(start, end):
+        #     row = []
+        #     for col_index_m2 in range(self.matrix_2.col_size):
+        #         product = sum(
+        #             [
+        #                 self.matrix_1.rows[row_index_m1][col_index_m1] *
+        #                 self.matrix_2.get_col(col_index_m2)[row_index_m1]
+        #                 for col_index_m1 in range(self.matrix_1.col_size)
+        #             ]
+        #         )
+        #         row.append(product)
+        #     thread_result.append(row)
+
+        array_matrix_1 = np.array(self.matrix_1.rows)
+        array_matrix_2 = np.array(self.matrix_2.rows)
+
+        sub_matrix_1 = array_matrix_1[start:end]
+        sub_matrix_2 = array_matrix_2
+
+        sub_result = np.dot(sub_matrix_1, sub_matrix_2.T)
+
+        for row in sub_result:
+            thread_result.append(row.tolist())
 
         return thread_result
 
@@ -96,7 +105,8 @@ class MethodTwo:
 
     def make_output_file(self) -> None:
         file_name = (f'output/matriz '
-                     f'{self.matrix_1.col_size} x {self.matrix_2.row_size} - [{THREADS_AMOUNT} THR] [{self.elapsed_time}].txt')
+                     f'{self.matrix_1.col_size} x {self.matrix_2.row_size} - '
+                     f'[{THREADS_AMOUNT} THR] [{self.elapsed_time}].txt')
 
         with open(file_name, 'w') as file:
             file.write(f'{self.matrix_1.col_size} {self.matrix_2.row_size}\n')

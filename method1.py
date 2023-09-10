@@ -1,21 +1,22 @@
 from matrix import Matrix
 import os
 import time
+import numpy as np
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 # noinspection DuplicatedCode
 class MethodOne:
     def __init__(self):
-        self.matrix_1 = Matrix(f'{current_dir}/src/3_alt.txt')
-        self.matrix_2 = Matrix(f'{current_dir}/src/3_alt.txt')
+        self.matrix_1 = Matrix(f'{current_dir}/src/128.txt')
+        self.matrix_2 = Matrix(f'{current_dir}/src/128.txt')
 
         start_time = time.time()
         self.result = self.get_multi_matrix()
         end_time = time.time()
 
         self.elapsed_time = end_time - start_time
-        self.elapsed_time = '{:.5f}'.format(self.elapsed_time)
+        # self.elapsed_time = '{:.5f}'.format(self.elapsed_time)
 
         print('result: ', self.result)
         print('elapsed time: ', self.elapsed_time)
@@ -27,18 +28,23 @@ class MethodOne:
             raise ValueError("O número de colunas da matriz 1 deve ser igual ao número de linhas da matriz 2!")
 
         result = []
-        for row_index_m1 in range(self.matrix_1.row_size):
-            row = []
-            for col_index_m2 in range(self.matrix_2.col_size):
-                product = sum(
-                    [
-                        self.matrix_1.rows[row_index_m1][col_index_m1] *
-                        self.matrix_2.get_col(col_index_m2)[col_index_m1]
-                        for col_index_m1 in range(self.matrix_1.col_size)
-                    ]
-                )
-                row.append(product)
-            result.append(row)
+        # for row_index_m1 in range(self.matrix_1.row_size):
+        #     row = []
+        #     for col_index_m2 in range(self.matrix_2.col_size):
+        #         product = sum(
+        #             [
+        #                 self.matrix_1.rows[row_index_m1][col_index_m1] *
+        #                 self.matrix_2.get_col(col_index_m2)[col_index_m1]
+        #                 for col_index_m1 in range(self.matrix_1.col_size)
+        #             ]
+        #         )
+        #         row.append(product)
+        #     result.append(row)
+
+        array_matrix_1 = np.array(self.matrix_1.rows)
+        array_matrix_2 = np.array(self.matrix_2.rows)
+        result_array = np.dot(array_matrix_1, array_matrix_2)
+        result = result_array.tolist()
 
         return result
 
