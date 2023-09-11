@@ -5,7 +5,6 @@ import time
 import numpy as np
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-THREADS_AMOUNT = 2
 
 # noinspection PyUnresolvedReferences
 class CustomThread(Thread):
@@ -21,11 +20,14 @@ class CustomThread(Thread):
         return self._return
 
 
-# no/nspection DuplicatedCode,PyShadowingNames
+# noinspection DuplicatedCode,PyShadowingNames
 class MethodTwo:
-    def __init__(self) -> None:
-        self.matrix_1 = Matrix(f'{current_dir}/src/128.txt')
-        self.matrix_2 = Matrix(f'{current_dir}/src/128.txt')
+    def __init__(self, variation, cores_amount, matrix_1_file, matrix_2_file) -> None:
+        self.matrix_1 = Matrix(f'{current_dir}/src/{matrix_1_file}')
+        self.matrix_2 = Matrix(f'{current_dir}/src/{matrix_2_file}')
+        self.threads_amount = self.get_threads_amount(variation, cores_amount)
+        self.variation = variation
+        self.cores_amount = cores_amount
         self.result, self.start_time, self.end_time = self.get_multi_matrix()
 
         self.elapsed_time = self.end_time - self.start_time
@@ -34,6 +36,14 @@ class MethodTwo:
         print('elapsed time: ', self.elapsed_time)
 
         self.make_output_file()
+
+    def get_threads_amount(self, variation, cores_amount):
+        if variation == 'P2':
+            return cores_amount
+        elif variation == 'P3':
+            return cores_amount * 2
+        elif variation == 'P4':
+            return cores_amount // 2
 
     def _get_chunks(self, rows, threads_amount) -> list:
         result = []
@@ -85,7 +95,7 @@ class MethodTwo:
 
         global_result = []
         threads_list = []
-        chunks = self._get_chunks(self.matrix_1.row_size, THREADS_AMOUNT)
+        chunks = self._get_chunks(self.matrix_1.row_size, self.threads_amount)
 
         for chunk in chunks:
             thread = CustomThread(target=self._process, args=[chunk[0], chunk[1]])
@@ -106,9 +116,16 @@ class MethodTwo:
     def make_output_file(self) -> None:
         file_name = (f'output/matriz '
                      f'{self.matrix_1.col_size} x {self.matrix_2.row_size} - '
-                     f'[{THREADS_AMOUNT} THR] [{self.elapsed_time}].txt')
+                     f'[{self.threads_amount} THR] [{self.elapsed_time}].txt')
 
         with open(file_name, 'w') as file:
+            file.write(f'Variação: {self.variation}\n')
+            file.write(f'Cores: {self.cores_amount}\n')
+            file.write('Computadores Remotos: Sem computadores remotos\n')
+            file.write(f'Número de Linhas: {self.matrix_2.row_size}\n')
+            file.write(f'Número de Colunas: {self.matrix_1.col_size}\n')
+            file.write(f'Tempo de processamento: {self.elapsed_time}\n\n')
+
             file.write(f'{self.matrix_1.col_size} {self.matrix_2.row_size}\n')
             for row in self.result:
                 line = ' '.join(map(str, row))
@@ -116,4 +133,8 @@ class MethodTwo:
 
 
 if __name__ == '__main__':
-    MethodTwo()
+    variation = 'P4'
+    cores_amount = 4
+    matrix_1_file = '128.txt'
+    matrix_2_file = '128.txt'
+    MethodTwo(variation, cores_amount, matrix_1_file, matrix_2_file)

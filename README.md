@@ -19,13 +19,15 @@ Um projeto da cadeira de Projeto de Sistemas Distribuídos
 - No primeiro e segundo método para a escolha dos vetores a serem multiplicados basta editar a linha:
 
     ```python
-    self.matrix_1 = Matrix(f'{current_dir}/src/<nome_do_arquivo>.txt')
-    self.matrix_2 = Matrix(f'{current_dir}/src/<nome_do_arquivo>.txt')
+    matrix_1_file = '<nome_do_arquivo>.txt'
+    matrix_2_file = '<nome_do_arquivo>.txt'
     ```
 
-- No Segundo método para a escolha do numero de threads basta editar a linha:
-    ```python 
-    THREADS_AMOUNT = <numero de threads que deseja>
+- No Segundo método além de escolher os arquivos das matrises é necessário informar o número de cores da maquina e escolher a variação:
+    ```python
+    variation = <variação 'P2', 'P3' ou 'P4'>
+    cores_amount = <número de cores da maquina> 
+    THREADS_AMOUNT = <número de threads que deseja>
     ```
 
 - Já no terceiro método é necessário seguir os segunites passos:
@@ -46,8 +48,6 @@ Um projeto da cadeira de Projeto de Sistemas Distribuídos
         ```
         - Troque o SERVER_HOST e WORKER_HOST de acordo com os computadores utilizados.
         - Não é necessário trocar o SERVER_NAME e WORKER_NAME.
-
-
     - Primeiro é necessário iniciar o servidor em um dos computadores:
         ```bash 
             python server.py
@@ -60,16 +60,17 @@ Um projeto da cadeira de Projeto de Sistemas Distribuídos
         - o **Worker** pode ser iniciado em mais de um computador, para o funcionamento o IP do servidor deverá ser o mesmo para todos os **Workers**.
         - Ao iniciar um **Worker** o mesmo se comunica com servidor, assim o servidor dividirá a tarefa para cada um.
 
-    - Ao final iniciar o client, porém configurar o caminho das matrizes editano as linhas:
+    - Ao final iniciar o client, configurando antes o caminho das matrizes modificando as linhas:
         ```python 
         matrix_1 = load_matrix('<nome_do_arquivo>.txt')
         matrix_2 = load_matrix('<nome_do_arquivo>.txt')
-
         ```
-
-    
-
-## Autor
+      
+## Autores
 
 - [@DouglasCostaBezerra](https://github.com/selfDoga1)
+- [@EduardaQueiroz](https://github.com/EduardaQueiroz)
+- [@AnaPaula](https://github.com/Ana011P)
+
+
 

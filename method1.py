@@ -7,9 +7,9 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 
 # noinspection DuplicatedCode
 class MethodOne:
-    def __init__(self):
-        self.matrix_1 = Matrix(f'{current_dir}/src/128.txt')
-        self.matrix_2 = Matrix(f'{current_dir}/src/128.txt')
+    def __init__(self, matrix_1_file, matrix_2_file):
+        self.matrix_1 = Matrix(f'{current_dir}/src/{matrix_1_file}')
+        self.matrix_2 = Matrix(f'{current_dir}/src/{matrix_2_file}')
 
         start_time = time.time()
         self.result = self.get_multi_matrix()
@@ -52,6 +52,13 @@ class MethodOne:
         file_name = f'output/matriz {self.matrix_1.col_size} x {self.matrix_2.row_size} - [{self.elapsed_time}].txt'
 
         with open(file_name, 'w') as file:
+            file.write('Variação: P1\n')
+            file.write('Threads: Sem threads dedicadas\n')
+            file.write('Computadores Remotos: Sem computadores remotos\n')
+            file.write(f'Número de Linhas: {self.matrix_2.row_size}\n')
+            file.write(f'Número de Colunas: {self.matrix_1.col_size}\n')
+            file.write(f'Tempo de processamento: {self.elapsed_time}\n\n')
+
             file.write(f'{self.matrix_1.col_size} {self.matrix_2.row_size}\n')
             for row in self.result:
                 line = ' '.join(map(str, row))
@@ -59,4 +66,6 @@ class MethodOne:
 
 
 if __name__ == '__main__':
-    MethodOne()
+    matrix_1_file = '128.txt'
+    matrix_2_file = '128.txt'
+    MethodOne(matrix_1_file, matrix_2_file)

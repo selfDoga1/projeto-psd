@@ -106,8 +106,8 @@ class Server:
         end_time = time.time()
         elapsed_time = end_time - start_time
 
-        cls.make_log_file(global_log, elapsed_time, current_time)
-        return global_result, len(cls.remote_workers), elapsed_time, current_time
+        # cls.make_log_file(global_log, elapsed_time, current_time)
+        return global_result, len(cls.remote_workers), elapsed_time, current_time, global_log
 
     @staticmethod
     def divide_chunks_per_worker(rows, workers_amount):

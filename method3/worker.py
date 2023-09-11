@@ -9,7 +9,7 @@ import numpy as np
 
 DEBUG = True
 load_dotenv()
-THREADS_AMOUNT = 2
+THREADS_AMOUNT = 4
 
 
 # noinspection PyUnresolvedReferences
